@@ -1,0 +1,388 @@
+<html></html>
+
+<head>
+    <title>Sasha Rabeno - INFO 5100 HW 6</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      
+    .gridlines line {
+      stroke: #bbb;
+    }
+    
+    .gridlines .domain {
+      stroke: none;
+    }
+
+    </style>
+</head>
+
+<body>
+
+    <p id="header">
+    <h3><mark style="background-color: #feebe2;">Name: Sasha Rabeno<br>Net ID: ar2525</mark></h3>
+
+
+
+    
+    </p>
+
+    <br>
+
+ 
+
+    <br>
+
+    <p id="q1">
+        
+
+        <svg id="scatterplot" height="500" width="800"></svg>
+    
+        <script>
+                
+        let svg = d3.select("svg#scatterplot");
+
+        const width = svg.attr("width");
+        const height = svg.attr("height");
+        const margin = { top: 60, right: 40, bottom: 40, left: 40 };
+
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
+
+        let annotations = svg.append("g").attr("id","annotations");
+        let chartArea = svg.append("g").attr("id", "points")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+        d3.csv('pokemon.csv').then((data) => {
+
+          data.forEach(d => {
+            
+          });
+            
+
+            // get extents
+
+            // Extent of gens (even though I know for this dataset it's 6)
+            const genExtent = d3.extent([1,6]);
+            const genScale = d3.scaleLinear().domain(genExtent).range([0, chartWidth]);
+            const genColorScale = d3.scaleSequential(["#0d0887","#6a00a8","#b12a90","#e16462","#fca636","#f0f921"]);
+
+            // Extent of BSTs (y axis)
+            const bstExtent = d3.extent(data, d => d['Total']);
+            const bstScale = d3.scaleLinear().domain(bstExtent).range([chartHeight, 0]);
+
+
+
+
+            // Extent of Types (x axis)
+            // const types = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy"]
+            const types = d3.map(data, d=>d["Type 1"]);
+            console.log(types)
+            const typeScale = d3.scaleBand().domain(types).range([0, chartWidth])
+            .padding(0.05);
+
+            // Type counts (y axis)
+            const typeCountExtent = d3.extent([0,130])
+            const typeCountScale = d3.scaleLinear().domain(typeCountExtent).range([chartHeight, 0]);
+
+            // Occurence of each type, in each gen
+            const allOccur =   {
+                "Grass": 95,
+                "Fire": 64,
+                "Water": 126,
+                "Bug": 72,
+                "Normal": 102,
+                "Poison": 62,
+                "Electric": 50,
+                "Ground": 67,
+                "Fairy": 40,
+                "Fighting": 53,
+                "Psychic": 90,
+                "Rock": 58,
+                "Ghost": 46,
+                "Ice": 38,
+                "Dragon": 50,
+                "Dark": 51,
+                "Steel": 49,
+                "Flying": 101
+            };
+
+            const Gen1Occur = {
+                "Grass": 15,
+                "Fire": 14,
+                "Water": 35,
+                "Bug": 14,
+                "Normal": 24,
+                "Poison": 36,
+                "Electric": 9,
+                "Ground": 14,
+                "Fairy": 5,
+                "Fighting": 9,
+                "Psychic": 18,
+                "Rock": 12,
+                "Ghost": 4,
+                "Ice": 5,
+                "Dragon": 4,
+                "Dark": 1,
+                "Steel": 2,
+                "Flying": 23
+            };
+
+            const Gen2Occur = {
+                "Grass": 10,
+                "Fire": 11,
+                "Water": 18,
+                "Bug": 12,
+                "Normal": 15,
+                "Poison": 4,
+                "Electric": 9,
+                "Ground": 11,
+                "Fairy": 8,
+                "Fighting": 4,
+                "Psychic": 10,
+                "Rock": 8,
+                "Ghost": 1,
+                "Ice": 5,
+                "Dragon": 2,
+                "Dark": 8,
+                "Steel": 6,
+                "Flying": 19
+            };
+
+            const Gen3Occur = {
+                "Grass": 18,
+                "Fire": 9,
+                "Water": 31,
+                "Bug": 14,
+                "Normal": 18,
+                "Poison": 5,
+                "Electric": 5,
+                "Ground": 16,
+                "Fairy": 8,
+                "Fighting": 9,
+                "Psychic": 28,
+                "Rock": 12,
+                "Ghost": 8,
+                "Ice": 7,
+                "Dragon": 15,
+                "Dark": 13,
+                "Steel": 12,
+                "Flying": 14
+            };
+
+            const Gen4Occur = {
+                "Grass": 17,
+                "Fire": 6,
+                "Water": 15,
+                "Bug": 11,
+                "Normal": 18,
+                "Poison": 8,
+                "Electric": 12,
+                "Ground": 12,
+                "Fairy": 2,
+                "Fighting": 10,
+                "Psychic": 10,
+                "Rock": 7,
+                "Ghost": 9,
+                "Ice": 8,
+                "Dragon": 8,
+                "Dark": 7,
+                "Steel": 12,
+                "Flying": 16
+            };
+
+            const Gen5Occur = {
+                "Grass": 20,
+                "Fire": 16,
+                "Water": 18,
+                "Bug": 18,
+                "Normal": 19,
+                "Poison": 7,
+                "Electric": 12,
+                "Ground": 12,
+                "Fairy": 3,
+                "Fighting": 17,
+                "Psychic": 16,
+                "Rock": 10,
+                "Ghost": 9,
+                "Ice": 9,
+                "Dragon": 12,
+                "Dark": 16,
+                "Steel": 12,
+                "Flying": 21
+            };
+
+            const Gen6Occur = {
+                "Grass": 15,
+                "Fire": 8,
+                "Water": 9,
+                "Bug": 3,
+                "Normal": 8,
+                "Poison": 2,
+                "Electric": 3,
+                "Ground": 2,
+                "Fairy": 14,
+                "Fighting": 4,
+                "Psychic": 8,
+                "Rock": 9,
+                "Ghost": 15,
+                "Ice": 4,
+                "Dragon": 9,
+                "Dark": 6,
+                "Steel": 5,
+                "Flying": 8
+            };
+
+
+            // y-axis == count
+            let leftAxis = d3.axisLeft(typeCountScale)
+                .tickFormat(d3.format("~f"));  // shorter scientific notation with a dollar sign in front
+            let leftGridlines = d3.axisLeft(typeCountScale)
+                .tickSize(-chartWidth - 10)
+                .tickFormat("")
+
+
+            annotations.append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate(" + (margin.left - 10) + "," + margin.top + ")")
+                .call(leftAxis)
+            annotations.append("g")
+                .attr("class", "y gridlines")
+                .attr("transform", "translate(" + (margin.left - 10) + "," + margin.top + ")")
+                .call(leftGridlines);
+                
+
+            // x-axis == type
+            let bottomAxis = d3.axisBottom(typeScale)
+                .tickFormat(d3.format(".0s"));  
+            let bottomAxisG = annotations.append("g")
+                               .attr("class", "x axis")
+                               .attr("transform",`translate(${margin.left},${chartHeight+margin.top+10})`)
+            let bottomGridlines = d3.axisBottom(typeScale)
+                .tickSize(-chartHeight - 10)
+                .tickFormat("")
+
+
+            annotations.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(" + margin.left + "," + (chartHeight + margin.top + 10) + ")")
+                .call(bottomAxis);
+            annotations.append("g")
+                .attr("class", "x gridlines")
+                .attr("transform", "translate(" + margin.left + "," + (chartHeight + margin.top + 10) + ")")
+                .call(bottomGridlines);
+
+
+        function updateBarsAnimated() {
+        
+        
+        
+
+        // Update and animate axes
+        bottomAxis.scale(typeScale)
+        bottomAxisG.transition().call(bottomAxis);
+
+
+        console.log(allOccur)
+  
+
+        chartArea.selectAll('rect.bar').data(allOccur)
+                 .join( enter => enter.append('rect')
+                                      .attr('class','bar')
+                                      .attr("fill", "steelblue")
+                                      .attr("x", d => typeScale(allOccur.Bug))
+                                      .attr("y", d => typeCountScale(d[1]))
+                                      .attr("height", d => typeCountScale(0) - typeCountScale(d[1]))
+                                      .attr("width", typeScale.bandwidth())
+                                      .attr("opacity", 0) // Set opacity low, then animate to 1 to make them fade in
+                                      .call( enter => enter.transition()
+                                                           .attr('opacity',1) ),
+                        update => update.call( update => update.transition()  // Animate resizing and movement
+                                                               .attr("fill", "steelblue")
+                                                               .attr("x",  d => typeScale(d[0]))
+                                                               .attr("y", d => typeCountScale(d[1]))
+                                                               .attr("height", d => typeCountScale(0) - typeCountScale(d[1]))
+                                                               .attr("width", typeScale.bandwidth()) ),
+                        exit => exit.call( exit => exit.transition().attr('opacity',0).remove() ) ); // Animate opacity to fade out
+        
+     
+      }   
+
+
+            // let circles = chartArea.selectAll("circle")  //select all circle elements
+            //     .data(data)
+            //     .join("circle") //does all the updating and such for you
+            //     .attr("r", 5)
+            //     .attr("cx", d => genScale(d['Generation'])) 
+            //     .attr("cy", d => bstScale(d['Total']))  
+            //     .style("fill", d => genColorScale(d['Generation']))
+              
+
+
+
+
+
+
+            // circles.on("mouseover", function () { // first argument is always a string for the event. second arg for us is a function
+
+            //     d3.select(this)
+            //         .transition()
+            //         .duration(100)
+            //         .attr("stroke-width", 2)
+            //         .attr("stroke", "black")  // this is *tecnically* a really dark purple
+            //         .attr("r", 6)
+                    
+            //     let title = d3.select(this).datum()['Name']
+            //     let generation = d3.select(this).datum()['Generation']
+                
+            //     chartArea.append("text")
+            //         .attr("class", "label")
+            //         .attr("x", 10)
+            //         .attr("y", 20)
+            //         .attr("text-anchor", "start")
+            //         .text(title + " " + generation );
+            // })
+
+
+            // // Mouseout, then undo what we did before
+            // circles.on("mouseout", function () { // first argument is always a string for the event. second arg for us is a function
+
+            //     d3.select(this)
+            //         .transition()
+            //         .duration(200)
+            //         .attr("stroke-width", 0)
+            //         .attr("stroke", "none")
+            //         .attr("r", 5)
+                    
+
+            //     chartArea.selectAll(".label")
+            //         .attr("opacity", 0);
+            // }) 
+
+
+
+        chartArea.append("text")
+        .attr("x", ((width - 80) / 2))             
+        .attr("y", 0 - (margin.top / 4))
+        .attr("text-anchor", "middle")  
+        .style("font-size", "18px")
+        .style("font-weight", "bold")
+        .text("super cool title");
+
+
+
+        updateBarsAnimated();
+
+
+        });
+
+
+    </script>
+    
+   
+
+    <br>
+
+
+</body>
+</html>
