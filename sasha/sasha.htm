@@ -42,7 +42,7 @@
 
         
         button {
-            background-color: #cbcbcb; /* Green background */
+            background-color: #FFF; /* Green background */
             color: black; /* White text */
             padding: 10px 24px; /* Some padding */
             cursor: pointer; /* Pointer/hand icon */
@@ -54,12 +54,12 @@
 </head>
 
 <body>
-
-    <p id="q1">
+    <div id="graph">
         
-
-        <svg id="scatterplot" height="600" width="1000"></svg>
         <div id="button-bar"></div>
+        <svg id="scatterplot" height="600" width="1000"></svg>
+    
+       
     
         <script>
                 
@@ -116,12 +116,12 @@
 
         function getGenExtent(genKey) { // I calculated these manually in Excel
             if (genKey === "All") return [0,130]
-            if (genKey === "Gen1") return [1,36]
-            if (genKey === "Gen2") return [1,19]
-            if (genKey === "Gen3") return [5,31]
-            if (genKey === "Gen4") return [2,18]
-            if (genKey === "Gen5") return [3,21]
-            if (genKey === "Gen6") return [2,15]
+            if (genKey === "Gen1") return [0,36]
+            if (genKey === "Gen2") return [0,19]
+            if (genKey === "Gen3") return [0,31]
+            if (genKey === "Gen4") return [0,18]
+            if (genKey === "Gen5") return [0,21]
+            if (genKey === "Gen6") return [0,15]
         }
 
 
@@ -148,16 +148,16 @@
                                       .attr("y", d => typeCountScale(d.Occurrences))
                                       .attr("height", d => typeCountScale(0) - typeCountScale(d.Occurrences))
                                       .attr("width", typeScale.bandwidth())
-                                      .attr("opacity", 0) // Set opacity low, then animate to 1 to make them fade in
+                                      .attr("opacity", 0) 
                                       .call( enter => enter.transition()
                                                            .attr('opacity',1) ),
-                        update => update.call( update => update.transition()  // Animate resizing and movement
+                        update => update.call( update => update.transition() 
                                                                .attr("fill",  d => colors[d.Type])
                                                                .attr("x",  d => typeScale(d.Type))
                                                                .attr("y", d => typeCountScale(d.Occurrences))
                                                                .attr("height", d => typeCountScale(0) - typeCountScale(d.Occurrences))
                                                                .attr("width", typeScale.bandwidth()) ),
-                        exit => exit.call( exit => exit.transition().attr('opacity',0).remove() ) ); // Animate opacity to fade out
+                        exit => exit.call( exit => exit.transition().attr('opacity',0).remove() ) );
         
 
 
@@ -175,26 +175,29 @@
 
                     chartArea.append("rect")    // text box background for improved visibility
                         .attr("class", "textboxbg")
-                        .attr('x', 5)
-                        .attr('y', 5)
-                        .attr('width', 100)
-                        .attr('height', 40)
+                        .attr('x', 50)
+                        .attr('y', 0)
+                        .attr('width', 150)
+                        .attr('height', 45)
                         .attr('stroke', 'none')
+                        .attr('rx', 15)
                         .attr('fill', colors[type]);
 
                     chartArea.append("text")
                         .attr("class", "label")
-                        .attr("x", 10)
+                        .attr("x", 70)
                         .attr("y", 20)
                         .attr("text-anchor", "start")
                         .style("fill", "black")
+                        .style("font-size", "18px")
                         .text("Type: " + type );
 
                     chartArea.append("text")
                         .attr("class", "label")
-                        .attr("x", 10)
+                        .attr("x", 70)
                         .attr("y", 40)
                         .attr("text-anchor", "start")
+                        .style("font-size", "18px")
                         .style("fill", "black")
                         .text( "Count: " + occurrences  );
 
@@ -242,6 +245,8 @@
           )
           .on("click", function() {
             updateBarsAnimated(gen);
+            changeImage(gen);
+            changeText(gen);
           })
       });
 
@@ -255,7 +260,7 @@
         .attr("text-anchor", "middle")  
         .style("font-size", "18px")
         .style("font-weight", "bold")
-        .text("super cool title");
+        .text("Type Distributions by Generation");
 
 
 
@@ -265,11 +270,48 @@
         });
 
 
-    </script>
-    
-   
+        function changeImage(gen) {
+                var img = document.getElementById("image");
+                if(gen==="All") img.src = "https://assets.pokemon.com/assets/cms2/img/pokedex/full//025.png";
+                if(gen==="Gen1") img.src = "https://assets.pokemon.com/assets/cms2/img/pokedex/full//001.png";
+                if (gen === "Gen2") img.src = "https://assets.pokemon.com/assets/cms2/img/pokedex/full//155.png";
+                if (gen === "Gen3") img.src = "https://assets.pokemon.com/assets/cms2/img/pokedex/full//258.png";
+                if (gen === "Gen4") img.src = "https://assets.pokemon.com/assets/cms2/img/pokedex/full//393.png";
+                if (gen === "Gen5") img.src = "https://assets.pokemon.com/assets/cms2/img/pokedex/full//495.png";
+                if (gen === "Gen6") img.src = "https://assets.pokemon.com/assets/cms2/img/pokedex/full//653.png";
+                
+                return false;
+        }
 
+        function changeText(gen) {
+                var text = document.getElementById("fun fact text");
+                if(gen==="All") text.innerHTML = "The most popular type overall is Water!";
+                if(gen==="Gen1") text.innerHTML = "Generation 1 has tons of Poison types, but mainly as a secondary type."
+                if (gen === "Gen2") text.innerHTML = "Generation 2 introduced the Dark and Steel types, which were retroactively applied to a handful of Kanto Pokemon.";
+                if (gen === "Gen3") text.innerHTML = "Being a water-based island region, it is no surprise Hoenn has an abundance of Water types!";
+                if (gen === "Gen4") text.innerHTML = "Generation 4 is known for its dismal lack of available Fire types; half of the six available are from the same evolution line (Chimchar).";
+                if (gen === "Gen5") text.innerHTML = "The most popular type in Generation 5 is Flying, narrowly beating out Grass.";
+                if (gen === "Gen6") text.innerHTML = "Generation 6 introduced the Fairy type, which was applied to 22 older Pokemon!";
+                return false;
+        }
+
+
+
+    </script>
+
+</div>
+
+<div id="fun facts">
+    <p id="fun fact text">Click any button to get started!</p>
     <br>
+    <img id="image" src="https://assets.pokemon.com/assets/cms2/img/pokedex/full//501.png" alt="poke-pic" width="200" height="200">
+    <br>
+    <br>
+    <img id="pikachu" src="info_5100_pikachu.png" alt="poke-pic" width="200" height="200">
+
+
+</div>
+<br>
 
 
 </body>
