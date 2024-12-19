@@ -1,0 +1,154 @@
+<html>
+
+<head>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+  <h2>Allison Yin ay283</h2>
+
+  <h3>Pokemon Attributes by Type</h3>
+
+  <div style="text-align: center;">
+    <label for="type">Select Type:</label>
+    <select id="type"></select>
+  </div>
+
+  <div class="container">
+    <svg id="graph" height="600" width="600"></svg>
+    <div class="legend"></div>
+  </div>
+
+  <script>
+
+    const svg = d3.select("svg#graph");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const diagram = svg.append("g");
+
+    const margins = { top: 10, right: 10, bottom: 50, left: 50 };
+    const chartWidth = width - margins.left - margins.right;
+    const chartHeight = height - margins.top - margins.bottom;
+
+    let chartArea = svg.append('g')
+      .attr('transform', `translate(${margins.left},${margins.top})`);
+
+    const type = document.getElementById("type");
+
+    d3.csv("../sasha/pokemon.csv")
+      .then((data) => {
+        console.log(data);
+
+        let dataset = data.map(row => ({
+          type: row["Type 1"],
+          hp: +row.HP,
+          attack: +row.Attack,
+          defense: +row.Defense
+        }));
+
+        const xExtent = d3.extent(dataset, d => d.attack)
+        const xScale = d3.scaleLinear().domain(xExtent)
+          .range([0, chartWidth]);
+
+        const yExtent = d3.extent(dataset, d => d.defense)
+        const yScale = d3.scaleLinear().domain(yExtent)
+          .range([chartHeight, 0]);
+
+        const rExtent = d3.extent(dataset, d => d.hp)
+        const rScale = d3.scaleLinear().domain(rExtent)
+          .range([2, 15]);
+
+        const fillExtent = d3.extent(dataset, d => d.type);
+        const fillScale = d3.scaleOrdinal(d3.schemeCategory10).domain(fillExtent);
+
+        let bottomAxis = d3.axisBottom(xScale);
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(${margins.left}, ${margins.top + chartHeight})`)
+          .call(bottomAxis);
+
+        let leftAxis = d3.axisLeft(yScale);
+        svg.append("g")
+          .attr("class", "y axis")
+          .attr("transform", `translate(${margins.left}, ${margins.top})`)
+          .call(leftAxis);
+
+        let bottomGridlines = d3.axisBottom(xScale).tickFormat('').tickSize(-chartHeight - 10);
+        svg.append("g")
+          .attr("class", "x gridlines")
+          .attr("transform", `translate(${margins.left}, ${margins.top + chartHeight})`)
+          .call(bottomGridlines);
+
+        let leftGridlines = d3.axisLeft(yScale).tickFormat('').tickSize(-chartWidth - 10)
+        svg.append("g")
+          .attr("class", "y gridlines")
+          .attr("transform", `translate(${margins.left}, ${margins.top})`)
+          .call(leftGridlines);
+
+        chartArea.append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "middle")
+          .attr("font-weight", "bold")
+          .attr("transform", `translate(${chartWidth / 2}, ${margins.top + chartHeight + 25})`)
+          .text("Attack");
+
+        chartArea.append("text")
+          .attr("class", "y label")
+          .attr("text-anchor", "middle")
+          .attr("font-weight", "bold")
+          .attr("transform", `translate(${margins.left - 85}, ${chartHeight / 2}) rotate(-90)`)
+          .text("Defense");
+
+        const types = Array.from(new Set(dataset.map(d => d.type)));
+
+        const all = document.createElement("option");
+        all.value = "All";
+        all.text = "All";
+        type.appendChild(all);
+
+        types.forEach(t => {
+          const option = document.createElement("option");
+          option.value = t;
+          option.text = t;
+          type.appendChild(option);
+        });
+
+        type.value = "All";
+
+        update(dataset);
+
+        type.addEventListener("change", () => update(dataset));
+
+        function update(data) {
+          const selected = type.value;
+          let newData;
+
+          chartArea.selectAll('circle').remove();
+
+          if (selected === "All") {
+            newData = dataset;
+          }
+
+          else {
+            newData = data.filter(d => d.type === selected)
+
+            console.log(newData);
+          }
+
+          newData.forEach((d, i) => {
+            chartArea.append('circle')
+              .attr('cx', xScale(d.attack) + margins.left)
+              .attr('cy', yScale(d.defense) - margins.bottom)
+              .attr('r', rScale(d.hp))
+              .attr('opacity', 0.75)
+              .attr('index', i)
+              .style('fill', fillScale(d.type));
+          });
+        };
+
+      });
+  </script>
+
+</body>
+
+</html>
