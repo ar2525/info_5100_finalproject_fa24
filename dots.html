@@ -15,13 +15,13 @@
   </div>
 
   <div>
-    <svg4 id="graph" height="600" width="600"></svg4>
+    <svg id="graph" height="600" width="600"></svg>
     <div class="legend"></div>
   </div>
 
   <script>
 
-    const svg4 = d3.select("svg4#graph");
+    const svg4 = d3.select("svg#graph");
     const width2 = svg4.attr("width");
     const height2 = svg4.attr("height");
     const diagram = svg4.append("g");
@@ -35,7 +35,7 @@
 
     const type = document.getElementById("type");
 
-    d3.csv("pokemon.csv")
+    d3.csv("Pokemon.csv")
       .then((data) => {
         console.log(data);
 
@@ -111,7 +111,7 @@
           .attr("class", "x label")
           .attr("text-anchor", "middle")
           .attr("font-weight", "bold")
-          .attr("transform", `translate(${chartWidth / 2}, ${margins.top + chartHeight2 + 25})`)
+          .attr("transform", `translate(${chartWidth2 / 2}, ${margins.top + chartHeight2 + 25})`)
           .text("Attack");
 
         chartArea2.append("text")
