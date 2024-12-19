@@ -1523,4 +1523,171 @@
   </body>
 </div>
 
+<div>
+  <h3>Pokemon HP, Attack, and Defense by Type</h3>
+
+  <div style="text-align: center;">
+    <label for="type">Select Type:</label>
+    <select id="type"></select>
+  </div>
+
+  <div>
+    <svg4 id="graph" height="600" width="600"></svg4>
+    <div class="legend"></div>
+  </div>
+
+  <script>
+
+    const svg4 = d3.select("svg4#graph");
+    const width2 = svg4.attr("width");
+    const height2 = svg4.attr("height");
+    const diagram = svg4.append("g");
+
+    const margins = { top: 10, right: 10, bottom: 50, left: 50 };
+    const chartWidth2 = width2 - margins.left - margins.right;
+    const chartHeight2 = height2 - margins.top - margins.bottom;
+
+    let chartArea2 = svg4.append('g')
+      .attr('transform', `translate(${margins.left},${margins.top})`);
+
+    const type = document.getElementById("type");
+
+    d3.csv("../sasha/pokemon.csv")
+      .then((data) => {
+        console.log(data);
+
+        let dataset = data.map(row => ({
+          type: row["Type 1"],
+          hp: +row.HP,
+          attack: +row.Attack,
+          defense: +row.Defense
+        }));
+
+        const xExtent = d3.extent(dataset, d => d.attack)
+        const xScale = d3.scaleLinear().domain(xExtent)
+          .range([0, chartWidth2]);
+
+        const yExtent = d3.extent(dataset, d => d.defense)
+        const yScale = d3.scaleLinear().domain(yExtent)
+          .range([chartHeight2, 0]);
+
+        const rExtent = d3.extent(dataset, d => d.hp)
+        const rScale = d3.scaleLinear().domain(rExtent)
+          .range([2, 18]);
+
+        const colors2 = [
+          "hsl(180, 70%, 50%)",
+          "hsl(200, 70%, 50%)",
+          "hsl(220, 70%, 50%)",
+          "hsl(240, 70%, 50%)",
+          "hsl(260, 70%, 50%)",
+          "hsl(280, 70%, 50%)",
+          "hsl(300, 70%, 50%)",
+          "hsl(320, 70%, 50%)",
+          "hsl(340, 70%, 50%)",
+          "hsl(0, 70%, 50%)",
+          "hsl(20, 70%, 50%)",
+          "hsl(40, 70%, 50%)",
+          "hsl(60, 70%, 50%)",
+          "hsl(80, 70%, 50%)",
+          "hsl(100, 70%, 50%)",
+          "hsl(120, 70%, 50%)",
+          "hsl(140, 70%, 50%)",
+          "hsl(160, 70%, 50%)"
+        ];
+
+        const fillExtent = d3.extent(dataset, d => d.type);
+        const fillScale = d3.scaleOrdinal(d3.scaleOrdinal()).domain(fillExtent).range(colors2);
+
+
+        let bottomAxis = d3.axisBottom(xScale);
+        svg4.append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(${margins.left}, ${margins.top + chartHeight2})`)
+          .call(bottomAxis);
+
+        let leftAxis = d3.axisLeft(yScale);
+        svg4.append("g")
+          .attr("class", "y axis")
+          .attr("transform", `translate(${margins.left}, ${margins.top})`)
+          .call(leftAxis);
+
+        let bottomGridlines = d3.axisBottom(xScale).tickFormat('').tickSize(-chartHeight2 - 10);
+        svg4.append("g")
+          .attr("class", "x gridlines")
+          .attr("transform", `translate(${margins.left}, ${margins.top + chartHeight2})`)
+          .call(bottomGridlines);
+
+        let leftGridlines = d3.axisLeft(yScale).tickFormat('').tickSize(-chartWidth2 - 10)
+        svg4.append("g")
+          .attr("class", "y gridlines")
+          .attr("transform", `translate(${margins.left}, ${margins.top})`)
+          .call(leftGridlines);
+
+        chartArea2.append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "middle")
+          .attr("font-weight", "bold")
+          .attr("transform", `translate(${chartWidth / 2}, ${margins.top + chartHeight2 + 25})`)
+          .text("Attack");
+
+        chartArea2.append("text")
+          .attr("class", "y label")
+          .attr("text-anchor", "middle")
+          .attr("font-weight", "bold")
+          .attr("transform", `translate(${margins.left - 85}, ${chartHeight2 / 2}) rotate(-90)`)
+          .text("Defense");
+
+        const types = Array.from(new Set(dataset.map(d => d.type)));
+
+        const all = document.createElement("option");
+        all.value = "All";
+        all.text = "All";
+        type.appendChild(all);
+
+        types.forEach(t => {
+          const option = document.createElement("option");
+          option.value = t;
+          option.text = t;
+          type.appendChild(option);
+        });
+
+        type.value = "All";
+
+        update(dataset);
+
+        type.addEventListener("change", () => update(dataset));
+
+        function update(data) {
+          const selected = type.value;
+          let newData;
+
+          chartArea2.selectAll('circle').remove();
+
+          if (selected === "All") {
+            newData = dataset;
+          }
+
+          else {
+            newData = data.filter(d => d.type === selected)
+
+            console.log(newData);
+          }
+
+          newData.forEach((d, i) => {
+            chartArea2.append('circle')
+              .attr('cx', xScale(d.attack) + margins.left)
+              .attr('cy', yScale(d.defense) - margins.bottom)
+              .attr('r', rScale(d.hp))
+              .attr('opacity', 0.75)
+              .attr('index', i)
+              .style('fill', fillScale(d.type));
+          });
+        };
+
+      });
+  </script>
+  </body>
+</div>
+
 </html>
